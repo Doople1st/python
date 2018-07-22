@@ -294,10 +294,6 @@ def Inception_Inflated3d(include_top=True,
                          str(WEIGHTS_NAME) + ' ' 
                          'or a valid path to a file containing `weights` values')
 
-    if weights in WEIGHTS_NAME and include_top and classes != 400:
-        raise ValueError('If using `weights` as one of these %s, with `include_top`'
-                         ' as true, `classes` should be 400' % str(WEIGHTS_NAME))
-
     # Determine proper input shape
     input_shape = _obtain_input_shape(
         input_shape,
@@ -541,7 +537,7 @@ def Inception_Inflated3d(include_top=True,
         if weights == WEIGHTS_NAME[0]:   # rgb_kinetics_only
             if include_top:
                 weights_url = WEIGHTS_PATH['rgb_kinetics_only']
-                model_name = 'i3d_inception_rgb_kinetics_only.h5'
+                model_name = 'i3d_inception_rgb_kinetics_only_no_top.h5'
             else:
                 weights_url = WEIGHTS_PATH_NO_TOP['rgb_kinetics_only']
                 model_name = 'i3d_inception_rgb_kinetics_only_no_top.h5'
@@ -587,6 +583,6 @@ def Inception_Inflated3d(include_top=True,
                           'at ~/.keras/keras.json.')
 
     elif weights is not None:
-        model.load_weights(weights)
+        model.load_weights(downloaded_weights_path, by_name = True)
 
     return model
