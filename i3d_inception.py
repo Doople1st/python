@@ -567,7 +567,7 @@ def Inception_Inflated3d(include_top=True,
                 model_name = 'i3d_inception_flow_imagenet_and_kinetics_no_top.h5'
 
         downloaded_weights_path = get_file(model_name, weights_url, cache_subdir='models')
-        model.load_weights(downloaded_weights_path)
+        model.load_weights(downloaded_weights_path,by_name=True)
 
         if K.backend() == 'theano':
             layer_utils.convert_all_kernels_in_model(model)
