@@ -47,6 +47,7 @@ def eval_generator(features, labels, batch_size):
   while True:
     index = test_index[count%len(test_index)]
     yield features[index], labels[index]
+    count+=1
 
 rgb_model = Inception_Inflated3d(
             include_top=True,
