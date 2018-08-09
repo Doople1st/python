@@ -21,7 +21,7 @@ FRAME_HEIGHT = 224
 FRAME_WIDTH = 224
 NUM_FRAMES = 126
 NUM_CLASSES = 10
-BATCH = 64
+BATCH = 4
 
 datagen = ImageDataGenerator(
         featurewise_center=False,  # set input mean to 0 over the dataset
@@ -46,35 +46,47 @@ datagen = ImageDataGenerator(
         # set function that will be applied on each input
         preprocessing_function=None,
         # image data format, either "channels_first" or "channels_last"
-        data_format=None,
+        data_format="channels_last",
         # fraction of images reserved for validation (strictly between 0 and 1)
-        validation_split=0)
+        validation_split=0.0)
 
 
 def generator(type):
   i=0
-  batch_features = np.zeros((1,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
-  batch_labels = np.zeros((1,NUM_CLASSES))
+  counter = 0
   if type=="train":
     while True:
-      batch_features= hf["train"][i%3]
-      batch_labels= train_labels[i%3]
-      print("Index: "+str(i))
-      print(batch_labels)
+      batch_features = np.zeros((BATCH,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
+      batch_labels = np.zeros((BATCH,NUM_CLASSES))
+      for i in range(BATCH):
+        batch_features[i]= hf["train"][counter%30]
+        batch_labels[i] = train_labels[counter%30]
+        print("Index: "+str(i)+", Counter: "+str(counter))
+        print(batch_labels)
+        counter+=1
       yield batch_features,batch_labels
-      i+=1
   elif type=="test":
     while True:
-      batch_features= hf["test"][i%1]
-      batch_labels= test_labels[i%1]
+      batch_features = np.zeros((BATCH,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
+      batch_labels = np.zeros((BATCH,NUM_CLASSES))
+      for i in range(BATCH):
+        batch_features[i]= hf["test"][counter%10]
+        batch_labels[i] = test_labels[counter%10]
+        print("Index: "+str(i))
+        print(batch_labels)
+        counter+=1
       yield batch_features,batch_labels
-      i+=1
   elif type=="validation":
     while True:
-      batch_features= hf["validation"][i%1]
-      batch_labels= validation_labels[i%1]
+      batch_features = np.zeros((BATCH,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
+      batch_labels = np.zeros((BATCH,NUM_CLASSES))
+      for i in range(BATCH):
+        batch_features[i]= hf["validation"][counter%10]
+        batch_labels[i] = validation_labels[counter%10]
+        print("Index: "+str(i))
+        print(batch_labels)
+        counter+=1
       yield batch_features,batch_labels
-      i+=1
 
 rgb_model = Inception_Inflated3d(
             include_top=False,
@@ -94,9 +106,7 @@ csv_logger = CSVLogger('training.log', append=False)
 tensorboard = TensorBoard(log_dir='./tf-logs')
 callbacks_list = [checkpoint,best_checkpoint, csv_logger, tensorboard]
 
-datagen.fit(hf["train"])
-
-rgb_model.fit_generator(datagen.flow(hf["train"],train_labels,batch_size=4), steps_per_epoch=len(hf["train"])/4, epochs=10, callbacks=callbacks_list,shuffle=True,validation_data = generator("validation"),validation_steps=1)
+rgb_model.fit_generator(generator("train"), steps_per_epoch=len(hf["train"])//4, epochs=10, callbacks=callbacks_list,shuffle=True,validation_data = generator("validation"),validation_steps=1)
 
 score = rgb_model.predict_generator(generator("test"),steps=10)
 np.save("dummy_result",score)
