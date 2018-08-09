@@ -4,6 +4,7 @@ from i3d_inception import Inception_Inflated3d
 import keras
 from keras import optimizers
 from keras.callbacks import TensorBoard, ModelCheckpoint, CSVLogger
+from keras.preprocessing.image import ImageDataGenerator
 
 hf = h5py.File("dummy.h5","r")
 train_label_file = open("train_label.txt","r")
@@ -22,11 +23,38 @@ NUM_FRAMES = 126
 NUM_CLASSES = 10
 BATCH = 64
 
+datagen = ImageDataGenerator(
+        featurewise_center=False,  # set input mean to 0 over the dataset
+        samplewise_center=False,  # set each sample mean to 0
+        featurewise_std_normalization=False,  # divide inputs by dataset std
+        samplewise_std_normalization=False,  # divide each input by its std
+        zca_whitening=False,  # apply ZCA whitening
+        zca_epsilon=1e-06,  # epsilon for ZCA whitening
+        rotation_range=0,  # randomly rotate images in 0 to 180 degrees
+        width_shift_range=0.1,  # randomly shift images horizontally
+        height_shift_range=0.1,  # randomly shift images vertically
+        shear_range=0.,  # set range for random shear
+        zoom_range=0.,  # set range for random zoom
+        channel_shift_range=0.,  # set range for random channel shifts
+        # set mode for filling points outside the input boundaries
+        fill_mode='nearest',
+        cval=0.,  # value used for fill_mode = "constant"
+        horizontal_flip=True,  # randomly flip images
+        vertical_flip=False,  # randomly flip images
+        # set rescaling factor (applied before any other transformation)
+        rescale=None,
+        # set function that will be applied on each input
+        preprocessing_function=None,
+        # image data format, either "channels_first" or "channels_last"
+        data_format=None,
+        # fraction of images reserved for validation (strictly between 0 and 1)
+        validation_split=0)
+
 
 def generator(type):
   i=0
-  batch_features = np.zeros((NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
-  batch_labels = np.zeros((NUM_CLASSES))
+  batch_features = np.zeros((1,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
+  batch_labels = np.zeros((1,NUM_CLASSES))
   if type=="train":
     while True:
       batch_features= hf["train"][i%3]
@@ -66,7 +94,9 @@ csv_logger = CSVLogger('training.log', append=False)
 tensorboard = TensorBoard(log_dir='./tf-logs')
 callbacks_list = [checkpoint,best_checkpoint, csv_logger, tensorboard]
 
-rgb_model.fit_generator(generator("train"), steps_per_epoch=4, epochs=10, callbacks=callbacks_list,shuffle=True,validation_data = generator("validation"),validation_steps=1)
+datagen.fit(hf["train"])
+
+rgb_model.fit_generator(datagen.flow(hf["train"],train_labels,batch_size=4), steps_per_epoch=len(hf["train"])/4, epochs=10, callbacks=callbacks_list,shuffle=True,validation_data = generator("validation"),validation_steps=1)
 
 score = rgb_model.predict_generator(generator("test"),steps=10)
 np.save("dummy_result",score)
