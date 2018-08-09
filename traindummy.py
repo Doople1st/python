@@ -23,33 +23,6 @@ NUM_FRAMES = 126
 NUM_CLASSES = 10
 BATCH = 4
 
-datagen = ImageDataGenerator(
-        featurewise_center=False,  # set input mean to 0 over the dataset
-        samplewise_center=False,  # set each sample mean to 0
-        featurewise_std_normalization=False,  # divide inputs by dataset std
-        samplewise_std_normalization=False,  # divide each input by its std
-        zca_whitening=False,  # apply ZCA whitening
-        zca_epsilon=1e-06,  # epsilon for ZCA whitening
-        rotation_range=0,  # randomly rotate images in 0 to 180 degrees
-        width_shift_range=0.1,  # randomly shift images horizontally
-        height_shift_range=0.1,  # randomly shift images vertically
-        shear_range=0.,  # set range for random shear
-        zoom_range=0.,  # set range for random zoom
-        channel_shift_range=0.,  # set range for random channel shifts
-        # set mode for filling points outside the input boundaries
-        fill_mode='nearest',
-        cval=0.,  # value used for fill_mode = "constant"
-        horizontal_flip=True,  # randomly flip images
-        vertical_flip=False,  # randomly flip images
-        # set rescaling factor (applied before any other transformation)
-        rescale=None,
-        # set function that will be applied on each input
-        preprocessing_function=None,
-        # image data format, either "channels_first" or "channels_last"
-        data_format="channels_last",
-        # fraction of images reserved for validation (strictly between 0 and 1)
-        validation_split=0.0)
-
 
 def generator(type):
   i=0
@@ -67,9 +40,9 @@ def generator(type):
       yield batch_features,batch_labels
   elif type=="test":
     while True:
-      batch_features = np.zeros((BATCH,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
-      batch_labels = np.zeros((BATCH,NUM_CLASSES))
-      for i in range(BATCH):
+      batch_features = np.zeros((1,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
+      batch_labels = np.zeros((1,NUM_CLASSES))
+      for i in range(1):
         batch_features[i]= hf["test"][counter%10]
         batch_labels[i] = test_labels[counter%10]
         print("Index: "+str(i))
@@ -78,9 +51,9 @@ def generator(type):
       yield batch_features,batch_labels
   elif type=="validation":
     while True:
-      batch_features = np.zeros((BATCH,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
-      batch_labels = np.zeros((BATCH,NUM_CLASSES))
-      for i in range(BATCH):
+      batch_features = np.zeros((1,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
+      batch_labels = np.zeros((1,NUM_CLASSES))
+      for i in range(1):
         batch_features[i]= hf["validation"][counter%10]
         batch_labels[i] = validation_labels[counter%10]
         print("Index: "+str(i))
