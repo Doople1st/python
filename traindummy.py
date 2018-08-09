@@ -25,31 +25,31 @@ BATCH = 64
 
 def generator(type):
   i=0
-  batch_features = np.zeros((1, NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
-  batch_labels = np.zeros((1,NUM_CLASSES))
+  batch_features = np.zeros((NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
+  batch_labels = np.zeros((NUM_CLASSES))
   if type=="train":
     while True:
-      batch_features[i] = hf["train"][i%30]
-      batch_labels[i] = train_labels[i%30]
+      batch_features= hf["train"][i%3]
+      batch_labels= train_labels[i%3]
       print("Index: "+str(i))
-      print(batch_labels[i])
+      print(batch_labels)
       yield batch_features,batch_labels
       i+=1
   elif type=="test":
     while True:
-      batch_features[i] = hf["test"][i%10]
-      batch_labels[i] = test_labels[i%10]
+      batch_features= hf["test"][i%1]
+      batch_labels= test_labels[i%1]
       yield batch_features,batch_labels
       i+=1
   elif type=="validation":
     while True:
-      batch_features[i] = hf["validation"][i%10]
-      batch_labels[i] = validation_labels[i%10]
+      batch_features= hf["validation"][i%1]
+      batch_labels= validation_labels[i%1]
       yield batch_features,batch_labels
       i+=1
 
 rgb_model = Inception_Inflated3d(
-            include_top=True,
+            include_top=False,
             weights='rgb_kinetics_only',
             input_shape=(NUM_FRAMES, FRAME_HEIGHT, FRAME_WIDTH, 3),
             classes=NUM_CLASSES,endpoint_logit=False)
