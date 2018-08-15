@@ -13,9 +13,9 @@ validation_label_file = open("test_validation_4_per_signer.txt","r")
 train_raw_labels = train_label_file.read().split("\n")
 test_raw_labels = test_label_file.read().split("\n")
 validation_raw_labels = validation_label_file.read().split("\n")
-train_labels = keras.utils.to_categorical(np.array(train_raw_labels),num_classes = 20)
-test_labels = keras.utils.to_categorical(np.array(test_raw_labels),num_classes = 20)
-validation_labels = keras.utils.to_categorical(np.array(validation_raw_labels),num_classes = 20)
+train_labels = keras.utils.to_categorical(np.array(train_raw_labels),num_classes = 40)
+test_labels = keras.utils.to_categorical(np.array(test_raw_labels),num_classes = 40)
+validation_labels = keras.utils.to_categorical(np.array(validation_raw_labels),num_classes = 40)
 train_index_file = open("train_2sign_index_1.txt","r")
 test_validation_index_file = open("test_validation_2sign_index_1.txt","r")
 train_index = []
@@ -28,7 +28,7 @@ for a in test_validation_index_file.read().split("\n"):
 FRAME_HEIGHT = 224
 FRAME_WIDTH = 224
 NUM_FRAMES = 126
-NUM_CLASSES = 20
+NUM_CLASSES = 40
 BATCH = 4
 
 
