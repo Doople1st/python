@@ -16,10 +16,14 @@ validation_raw_labels = validation_label_file.read().split("\n")
 train_labels = keras.utils.to_categorical(np.array(train_raw_labels),num_classes = 10)
 test_labels = keras.utils.to_categorical(np.array(test_raw_labels),num_classes = 10)
 validation_labels = keras.utils.to_categorical(np.array(validation_raw_labels),num_classes = 10)
-
-print(train_labels[0])
-print(train_labels[30])
-input()
+train_index_file = open("train_2sign_index_1.txt","r")
+test_validation_index_file = open("test_validation_2sign_index_1.txt","r")
+train_index = []
+test_validation_index = []
+for a in train_index_file.read().split("\n"):
+  train_index.append(int(a))
+for a in test_validation_index_file.read().split("\n"):
+  test_validation_index.append(int(a))
 
 FRAME_HEIGHT = 224
 FRAME_WIDTH = 224
@@ -36,8 +40,8 @@ def generator(type):
       batch_features = np.zeros((BATCH,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
       batch_labels = np.zeros((BATCH,NUM_CLASSES))
       for i in range(BATCH):
-        batch_features[i]= hf["train"][counter%60]
-        batch_labels[i] = train_labels[counter%60]
+        batch_features[i]= hf["train"][train_index[counter%60]]
+        batch_labels[i] = train_labels[train_index[counter%60]]
         print("Index: "+str(i)+", Counter: "+str(counter))
         print(batch_labels)
         counter+=1
@@ -47,8 +51,8 @@ def generator(type):
       batch_features = np.zeros((1,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
       batch_labels = np.zeros((1,NUM_CLASSES))
       for i in range(1):
-        batch_features[i]= hf["test"][counter%20]
-        batch_labels[i] = test_labels[counter%20]
+        batch_features[i]= hf["test"][test_validation_index[counter%20]]
+        batch_labels[i] = test_labels[test_validation_index[counter%20]]
         print("Index: "+str(i))
         print(batch_labels)
         counter+=1
@@ -58,8 +62,8 @@ def generator(type):
       batch_features = np.zeros((BATCH,NUM_FRAMES, FRAME_WIDTH, FRAME_HEIGHT,3))
       batch_labels = np.zeros((BATCH,NUM_CLASSES))
       for i in range(BATCH):
-        batch_features[i]= hf["validation"][counter%20]
-        batch_labels[i] = validation_labels[counter%20]
+        batch_features[i]= hf["validation"][test_validation_index[counter%20]]
+        batch_labels[i] = validation_labels[test_validation_index[counter%20]]
         print("Index: "+str(i))
         print(batch_labels)
         counter+=1
